@@ -1,0 +1,53 @@
+<template>
+    <lightning-modal-header label="Upload Actualized Data"></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slds-is-relative">
+            <lightning-spinner lwc:if={isLoading} variant="brand" size="large"> </lightning-spinner>
+            <div>
+                <h3><strong>Campaign Actualization Guidance</strong></h3>
+                <ul class="slds-list_dotted">
+                    <li>Please read the instructions carefully before uploading your document.</li>
+                    <template if:true={isAPACRegion}>
+                        <li>Use the APAC Excel file Template to ensure proper formatting and column headers.</li>
+                        <li>Fill out the template with the required data and upload it.</li>
+                    </template>
+                    <template if:false={isAPACRegion}>
+                        <li>Use the Sample NTAM file to help guide on proper formatting and column headers.</li>
+                        <li>Ensure your worksheets contain 'SF_CAMPAIGN_ID,Actualized Billable Units,Actualized Billable Spend,Actualized Payable Units' columns.</li>
+                    </template>
+                    <li>Once the process is started you can not cancel it. The process will complete automatically once the data is processed.</li>
+                </ul>
+                <div class="slds-m-top_small slds-align_absolute-center">
+                    <lightning-input 
+                        type="file" 
+                        label="Upload Actualization Data" 
+                        name="fileUploader"
+                        accept={acceptedFormats}
+                        onchange={handleUploadFinished}
+                        class="slds-m-bottom_medium">
+                    </lightning-input>
+                </div>
+            </div>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <div class="slds-align_absolute-center">
+            <lightning-button 
+                label="Cancel" 
+                onclick={handleCancelClick} 
+                disabled={disableCancelBtn} 
+                title="Cancel the operation"
+            ></lightning-button>
+            <div class="slds-m-left_x-small">
+                <lightning-button 
+                    label="Preview Data" 
+                    onclick={handlePreviewDataClick} 
+                    variant="brand" 
+                    disabled={disablePreviewDataBtn} 
+                    title="Preview Data"
+                    icon-name= "utility:preview"
+                ></lightning-button>
+            </div>
+        </div>
+    </lightning-modal-footer>
+</template>

@@ -1,0 +1,11 @@
+.filters {
+    background-color: var(--lwc-colorBackground);
+    margin-left: 0;
+    padding-bottom: .5rem;
+    border: 1px solid grey;
+    border-radius: 4px;
+}
+.icon-color {
+    --slds-c-icon-color-foreground-default: orange;
+    --slds-c-icon-color-background: gray;
+}

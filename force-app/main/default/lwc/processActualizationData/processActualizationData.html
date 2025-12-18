@@ -1,0 +1,234 @@
+<template>
+    <!-- Loading Spinner -->
+    <template if:true={isLoading}>
+        <lightning-spinner 
+            alternative-text="Loading" 
+            class="slds-m-bottom_medium"
+            variant="brand"
+        ></lightning-spinner>
+    </template>
+    <!-- header panel -->
+    <lightning-card>
+        <div class="slds-media slds-media_center" slot="title">
+            <div class="slds-media__figure">
+                <lightning-icon icon-name="custom:custom63" size="medium"></lightning-icon>
+              </div>
+              <div class="slds-media__body">
+                <h1 class="slds-card__header-title">
+                    <span>{runningRegion}: Campaign Actualization</span>
+                </h1>
+            </div>
+        </div>
+        <!-- Button Actions -->
+        <div slot="actions">
+            <lightning-button-group>
+                <template if:false={defaultActualizationFile}>
+                    <template if:true={runningUserIsGlobal}>
+                        <lightning-combobox
+                            name="progress"
+                            value={runningRegion}
+                            placeholder="Select Actualization Region"
+                            options={regionSelctionOptions}
+                            onchange={setupSelectedRegion}
+                            class="slds-float_top">
+                        </lightning-combobox>
+                    </template>
+                </template>
+                <template if:true={defaultActualizationFile}>
+                    <lightning-button 
+                        label={fileDownloadLabel}
+                        icon-name="utility:download"
+                        onclick={handleDownloadTemplate}
+                    ></lightning-button>
+                    <lightning-button 
+                        label="Upload Actualized Data"
+                        icon-name="utility:upload"
+                        variant="neutral"
+                        onclick={handleUploadActualizationTemplate}
+                        disabled={disableUploadBtn}
+                    ></lightning-button> 
+                    <lightning-button 
+                        label="Start Actualization"
+                        variant="brand"
+                        onclick={handleStartActualization}
+                        icon-name="utility:play"
+                        disabled={disableStartProcessBtn}
+                    ></lightning-button>
+                    <template lwc:if={isBatchCompleted}>
+                        <lightning-button
+                            label="Start New Job"
+                            icon-name="utility:refresh"
+                            variant="brand"
+                            onclick={handleStartNewJob}
+                        ></lightning-button>
+                    </template>
+                </template>
+            </lightning-button-group>
+        </div>
+    </lightning-card>
+    <!-- job running alert -->
+    <template if:true={hasRunningJob}>
+        <div class="slds-m-top_medium">
+            <div class="slds-notify slds-notify_alert slds-alert slds-text-align_center" role="alert">
+                <span class="slds-assistive-text">warning</span>
+                <lightning-icon 
+                    icon-name="utility:info"
+                    size="small"
+                    variant="inverse"
+                ></lightning-icon>
+            <span class="slds-text-body_large">An active actualization job is running. The process is locked until the job is complete.</span>
+            </div>
+        </div>
+    </template>
+    <!-- Previous Jobs -->
+    <div class="slds-m-top_medium">
+        <template if:true={runningRegion}>
+            <c-process-actualization-recent-jobs region={runningRegion}></c-process-actualization-recent-jobs>
+        </template>
+     </div>
+    <!-- Lightning Card for Progress Bar -->
+    <template if:true={isJobStarted}>
+        <div class="slds-m-top_medium">
+            <lightning-card title="Actualization Progress" icon-name="utility:hourglass">
+                <div slot="actions">
+                    <lightning-button 
+                        label="Notify When Complete" 
+                        onclick={handleNotifyWhenComplete} 
+                        title="Notify When Complete"
+                        variant="base"
+                        disabled={isNotifyWhenComplete}
+                    ></lightning-button>
+                </div>
+                <div class="loading-container slds-is-relative">
+                    <template lwc:if={hasRunningJob}>
+                        <lightning-spinner 
+                            size="small"
+                            variant="brand"
+                        ></lightning-spinner>
+                    </template>
+                </div>
+                <div class="slds-p-around_medium">
+                    <div class="slds-m-bottom_small">
+                        <span>Status:&nbsp;</span><span>{jobStatusDetails}</span>
+                    </div>
+                    <lightning-progress-bar 
+                        value={executedIndicator} 
+                        size="large"
+                        variant="circular"
+                    ></lightning-progress-bar>
+                </div>
+            </lightning-card>
+        </div>
+    </template>
+   <!-- actuliation results-->
+    <template lwc:if={showResultsComponent}>
+        <div class="slds-m-top_medium">
+            <lightning-card title={actualizationTableTitle} icon-name="utility:record_collection">
+                <div if:true={isBatchCompleted} slot="actions">
+                    <lightning-button 
+                        label="Open Results File" 
+                        onclick={openResultURL} 
+                        title="Open Results File"
+                        variant="base"
+                    ></lightning-button>
+                </div>
+                <div class="slds-m-around_medium">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-formatted-date-time 
+                                value={scheduleDate}
+                                year="numeric"
+                                month="2-digit"
+                                class="slds-text-heading_small"
+                            ></lightning-formatted-date-time>
+                            <p>Monthly Schedule</p>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-formatted-number 
+                                value={numOfRecordsToProcess}
+                                class="slds-text-heading_small">
+                            </lightning-formatted-number>
+                            <p>Total Records</p>
+                        </div>
+                        <template lwc:if={isBatchCompleted}>
+                            <div class="slds-col">
+                                <lightning-formatted-number 
+                                    value={executedRecords}
+                                    class="slds-text-heading_small">
+                                </lightning-formatted-number>
+                                <p>Processed Records</p>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-formatted-number 
+                                    value={noSuccessRecords}
+                                    class="slds-text-heading_small slds-text-color_success">
+                                </lightning-formatted-number>
+                                <p>Succeeded Records</p>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-formatted-number 
+                                    value={noErrorRecords}
+                                    class="slds-text-heading_small slds-text-color_error">
+                                </lightning-formatted-number>
+                                <p>Failed Records</p>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="slds-col"></div>
+                            <div class="slds-col"></div>
+                            <div class="slds-col"></div>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-m-around_x-small">
+                    <div class="slds-grid slds-grid_vertical-align-end slds-m-bottom_medium">
+                        <div class="slds-col slds-size_6-of-12 slds-grid slds-grid_vertical-align-end slds-gutters filters">
+                            <div class="slds-col slds-size_2-of-4">
+                                <lightning-input 
+                                    label="Sell Line" 
+                                    value={textValue} 
+                                    placeholder="Type a CP number to filter"
+                                    onchange={handleSellLineChange}
+                                ></lightning-input>
+                                <lightning-input
+                                    label="Error Message" 
+                                    value={textValue}
+                                    placeholder="Type an error message to filter"
+                                    onchange={handleErrorMessageChange}
+                                    disabled={jobIsNotComplete}
+                                ></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <lightning-radio-group
+                                    name="recordOptions"
+                                    options={options}
+                                    value={selectedOption}
+                                    onchange={handleRadioChange}
+                                    disabled={jobIsNotComplete}
+                                ></lightning-radio-group>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <lightning-button 
+                                    label="Reset Filters" 
+                                    title="Reset Filters" 
+                                    onclick={resetFilters}
+                                    variant="base"
+                                ></lightning-button>
+                            </div>                            
+                        </div>
+                    </div>
+                    <template lwc:if={hasFilteredResults}>
+                        <c-data-table-with-pagination 
+                            records={filteredActualizationResults}
+                            columns={columns}
+                            default-page-size=50
+                        ></c-data-table-with-pagination>
+                    </template>
+                    <template lwc:else>
+                        <p>No Results found.</p>
+                    </template>
+                </div>
+            </lightning-card>
+        </div>
+    </template>
+</template>
