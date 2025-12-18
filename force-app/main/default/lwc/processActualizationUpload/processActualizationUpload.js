@@ -114,7 +114,6 @@ export default class ProcessActualizationUpload extends LightningModal {
         }
     });
 
-    console.log('FINAL CLEAN DATA:', cleanData);
     return cleanData;
 }
 
