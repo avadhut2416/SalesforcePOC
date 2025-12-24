@@ -37,9 +37,6 @@ System.debug('Decoded JSON: ' + jsonString);
                 cleanRow.put('SellLine', '');
             }
 
-            cleanRow.putAll(row);
-            cleaned.add(cleanRow);
-        }
 
         evt.FileData__c = JSON.serialize(cleaned);
 
