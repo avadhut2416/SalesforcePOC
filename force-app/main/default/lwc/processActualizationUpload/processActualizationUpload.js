@@ -170,9 +170,6 @@ export default class ProcessActualizationUpload extends LightningModal {
         this.close(uploadResult);
     }
 
-    handleCancelClick() {
-        this.close(null);
-    }
 
     _saveNewFileVerison(file) {
         let fileData = {
