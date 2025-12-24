@@ -64,10 +64,7 @@ export default class ProcessActualizationUpload extends LightningModal {
                 for (var i = 0; i < workbook.SheetNames.length; ++i) {
                     let XL_row_object = XLS.utils.sheet_to_row_object_array(workbook.Sheets[workbook.SheetNames[i]]);
                     this._cleanUSJsonData(XL_row_object);
-                }
-            }
-
-            this._saveNewFileVerison(data);
+              
         };
 
         reader.onerror = ex => {
